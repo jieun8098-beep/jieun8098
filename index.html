@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#030407">
+<title>작업 현황</title>
+<style>
+  :root{
+    --bg:#030407;
+    --panel:#0a0b11;
+    --card-a:#12141d;
+    --card-b:#0b0d13;
+    --line:rgba(132,148,205,.18);
+    --line-soft:rgba(255,255,255,.07);
+    --text:#eef0f5;
+    --dim:#8d929e;
+    --faint:#666c79;
+    --blue:#6f9bff;
+    --radius:20px;
+    --font:-apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard",
+           "Malgun Gothic", "Noto Sans KR", "Segoe UI", Roboto, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  body::before{
+    content:"";
+    position:fixed;
+    top:-240px; left:50%;
+    width:min(1100px,140vw); height:620px;
+    transform:translateX(-50%);
+    background:radial-gradient(50% 50% at 50% 50%, rgba(74,96,190,.20), rgba(74,96,190,.06) 55%, transparent 72%);
+    pointer-events:none;
+    z-index:0;
+  }
+  .app{
+    position:relative;
+    z-index:1;
+    max-width:1180px;
+    margin:0 auto;
+    padding:44px 28px 96px;
+  }
+
+  /* ---------- Header ---------- */
+  .page-head{padding:0 2px;}
+  h1{
+    margin:0;
+    font-size:clamp(27px,4.2vw,36px);
+    font-weight:800;
+    letter-spacing:-.025em;
+    line-height:1.2;
+    color:#fbfcfe;
+  }
+  .sub{
+    margin:12px 0 0;
+    font-size:clamp(14px,1.6vw,16px);
+    font-weight:450;
+    color:var(--dim);
+    letter-spacing:-.01em;
+    line-height:1.5;
+  }
+  .kpis{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:14px;
+    margin-top:34px;
+  }
+  .kpi .num{
+    font-size:clamp(30px,4.6vw,42px);
+    font-weight:800;
+    letter-spacing:-.03em;
+    line-height:1;
+    color:#f6f7fa;
+    font-variant-numeric:tabular-nums;
+  }
+  .kpi .lab{
+    margin-top:12px;
+    font-size:13.5px;
+    font-weight:500;
+    color:#8b8f9a;
+    letter-spacing:-.01em;
+    white-space:nowrap;
+  }
+  .updated{
+    margin:26px 0 0;
+    font-size:13px;
+    color:#82868f;
+    letter-spacing:-.01em;
+  }
+
+  /* ---------- Section ---------- */
+  .section-title{
+    margin:52px 0 0;
+    font-size:clamp(21px,2.6vw,26px);
+    font-weight:800;
+    letter-spacing:-.025em;
+    color:#f4f5f9;
+  }
+  .controls{
+    margin-top:20px;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:14px;
+  }
+  .pills{
+    display:flex;
+    gap:9px;
+    overflow-x:auto;
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+    padding:2px;
+    margin:-2px;
+    max-width:100%;
+  }
+  .pills::-webkit-scrollbar{display:none;}
+  .pill{
+    flex:0 0 auto;
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    padding:10px 16px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.055);
+    background:#22262f;
+    color:#c4c8d2;
+    font-family:var(--font);
+    font-size:14.5px;
+    font-weight:600;
+    letter-spacing:-.015em;
+    cursor:pointer;
+    white-space:nowrap;
+    transition:background .18s ease, color .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .pill:hover{background:#2a2f3a;color:#e6e8ee;}
+  .pill:active{transform:scale(.97);}
+  .pill.is-active{
+    background:linear-gradient(180deg,#2c3549,#222a39);
+    border-color:rgba(127,157,255,.45);
+    color:#ffffff;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.07), 0 8px 22px -14px rgba(95,135,255,.9);
+  }
+  .pill .em{font-size:14px;line-height:1;transform:translateY(.5px);}
+
+  /* ---------- Toggle ---------- */
+  .switch{
+    display:inline-flex;
+    align-items:center;
+    gap:11px;
+    padding:6px 8px 6px 2px;
+    margin-left:0;
+    border:0;
+    background:none;
+    font-family:var(--font);
+    color:#a9adb8;
+    font-size:14.5px;
+    font-weight:500;
+    letter-spacing:-.015em;
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+    transition:color .18s ease;
+  }
+  .switch:hover{color:#d5d8e0;}
+  .switch-track{
+    position:relative;
+    width:46px; height:26px;
+    border-radius:999px;
+    background:#1b2130;
+    border:1px solid rgba(255,255,255,.08);
+    transition:background .22s ease, border-color .22s ease, box-shadow .22s ease;
+    flex:0 0 auto;
+  }
+  .switch-knob{
+    position:absolute;
+    top:2px; left:2px;
+    width:20px; height:20px;
+    border-radius:50%;
+    background:#f7f8fb;
+    box-shadow:0 2px 6px rgba(0,0,0,.55);
+    transition:transform .22s cubic-bezier(.34,1.4,.5,1);
+  }
+  .switch[aria-checked="true"]{color:#e3e7f2;}
+  .switch[aria-checked="true"] .switch-track{
+    background:linear-gradient(180deg,#4b6cf5,#3350dc);
+    border-color:rgba(145,170,255,.55);
+    box-shadow:0 0 0 3px rgba(78,110,235,.13), 0 6px 18px -10px rgba(78,110,235,.9);
+  }
+  .switch[aria-checked="true"] .switch-knob{transform:translateX(20px);}
+
+  /* ---------- Board ---------- */
+  .board{
+    margin-top:22px;
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:13px;
+    padding:13px;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    background:
+      radial-gradient(130% 70% at 50% 0%, rgba(72,92,170,.07), transparent 72%),
+      rgba(255,255,255,.012);
+    box-shadow:0 30px 80px -60px rgba(90,120,220,.6), inset 0 1px 0 rgba(255,255,255,.03);
+  }
+  .column{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    padding:11px;
+    min-height:200px;
+    border:1px solid rgba(128,144,205,.15);
+    border-radius:15px;
+    background:linear-gradient(180deg, rgba(15,17,25,.92), rgba(8,9,14,.92));
+  }
+  .col-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    padding:6px 6px 9px;
+  }
+  .col-name{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-size:15.5px;
+    font-weight:700;
+    letter-spacing:-.02em;
+    color:#e8eaf0;
+  }
+  .dot{width:7px;height:7px;border-radius:50%;flex:0 0 auto;box-shadow:0 0 10px currentColor;}
+  .col-count{
+    font-size:14.5px;
+    font-weight:600;
+    color:#9ba0ac;
+    font-variant-numeric:tabular-nums;
+  }
+  .cards{display:flex;flex-direction:column;gap:9px;}
+
+  /* ---------- Card ---------- */
+  .card{
+    position:relative;
+    display:block;
+    width:100%;
+    text-align:left;
+    padding:13px 13px 13px 15px;
+    border:1px solid var(--line-soft);
+    border-radius:13px;
+    background:linear-gradient(180deg,var(--card-a),var(--card-b));
+    font-family:var(--font);
+    color:inherit;
+    cursor:pointer;
+    overflow:hidden;
+    -webkit-tap-highlight-color:transparent;
+    transition:border-color .18s ease, background .18s ease, transform .18s ease, box-shadow .18s ease;
+    animation:cardIn .32s cubic-bezier(.2,.7,.3,1) both;
+  }
+  .card::after{
+    content:"";
+    position:absolute;
+    left:0; top:12px; bottom:12px;
+    width:2.5px;
+    border-radius:0 3px 3px 0;
+    background:var(--c,#6f9bff);
+    opacity:.85;
+  }
+  .card:hover{
+    border-color:rgba(140,160,225,.28);
+    background:linear-gradient(180deg,#161924,#0d0f16);
+    transform:translateY(-1px);
+    box-shadow:0 12px 26px -20px #000;
+  }
+  .card:active{transform:scale(.988);}
+  .card:focus-visible{outline:2px solid rgba(120,155,255,.9);outline-offset:2px;}
+  .card-top{display:flex;align-items:center;gap:8px;justify-content:space-between;}  .chip{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    font-size:11.5px;
+    font-weight:600;
+    letter-spacing:-.01em;
+    color:#9aa1b1;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .chip .em{font-size:11px;line-height:1;filter:saturate(.95);}
+  .stamp{
+    font-size:11px;
+    font-weight:500;
+    color:#6b7280;
+    font-variant-numeric:tabular-nums;
+    white-space:nowrap;
+    flex:0 0 auto;
+  }
+  .badge{
+    flex:0 0 auto;
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    padding:3px 7px;
+    border-radius:999px;
+    font-size:10.5px;
+    font-weight:700;
+    letter-spacing:-.01em;
+    color:#ffd479;
+    background:rgba(255,198,74,.12);
+    border:1px solid rgba(255,198,74,.28);
+  }
+  .badge .bdot{width:4px;height:4px;border-radius:50%;background:#ffce55;}
+  .card-title{
+    display:block;
+    margin-top:7px;
+    font-size:14px;
+    font-weight:650;
+    line-height:1.45;
+    letter-spacing:-.02em;
+    color:#eceef4;
+    word-break:keep-all;
+    overflow-wrap:anywhere;
+  }
+  .card-note{
+    margin-top:6px;
+    font-size:12px;
+    line-height:1.55;
+    letter-spacing:-.01em;
+    color:#8b92a2;
+    word-break:keep-all;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .col-done .card-title{color:#d9dce4;}
+
+  .empty{
+    padding:22px 10px;
+    border:1px dashed rgba(255,255,255,.08);
+    border-radius:12px;
+    text-align:center;
+    font-size:12.5px;
+    color:#5f6572;
+    letter-spacing:-.01em;
+  }
+  .hint{
+    margin:16px 2px 0;
+    font-size:12.5px;
+    color:#636975;
+    letter-spacing:-.015em;
+    text-align:center;
+  }
+
+  /* ---------- Modal ---------- */
+  .backdrop{
+    position:fixed;
+    inset:0;
+    z-index:50;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    background:rgba(2,3,7,.68);
+    -webkit-backdrop-filter:blur(10px);
+    backdrop-filter:blur(10px);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .2s ease;
+  }
+  .backdrop.open{opacity:1;pointer-events:auto;}
+  .modal{
+    position:relative;
+    width:min(540px,100%);
+    max-height:min(80vh,640px);
+    overflow-y:auto;
+    padding:24px 24px 22px;
+    border:1px solid rgba(134,150,210,.24);
+    border-radius:20px;
+    background:linear-gradient(180deg,#141722,#0a0b11);
+    box-shadow:0 40px 100px -30px #000, inset 0 1px 0 rgba(255,255,255,.05);
+    transform:translateY(14px) scale(.985);
+    opacity:0;
+    transition:transform .22s cubic-bezier(.2,.8,.3,1), opacity .22s ease;
+  }
+  .backdrop.open .modal{transform:none;opacity:1;}
+  .modal::-webkit-scrollbar{width:6px;}
+  .modal::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:99px;}
+  .m-top{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+  .m-cat{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:12px;font-weight:600;color:#a4abbc;letter-spacing:-.01em;
+  }
+  .m-close{
+    flex:0 0 auto;
+    width:32px;height:32px;
+    display:grid;place-items:center;
+    border-radius:50%;
+    border:1px solid rgba(255,255,255,.09);
+    background:rgba(255,255,255,.045);
+    color:#b9bec9;
+    font-size:15px;
+    line-height:1;
+    cursor:pointer;
+    transition:background .15s ease,color .15s ease;
+  }
+  .m-close:hover{background:rgba(255,255,255,.1);color:#fff;}
+  .m-title{
+    margin:14px 0 0;
+    font-size:20px;
+    font-weight:750;
+    line-height:1.4;
+    letter-spacing:-.025em;
+    color:#f5f6fa;
+    word-break:keep-all;
+  }
+  .m-status{
+    margin-top:12px;
+    display:flex;flex-wrap:wrap;align-items:center;gap:8px;
+  }
+  .tag{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:5px 10px;
+    border-radius:999px;
+    font-size:11.5px;
+    font-weight:650;
+    letter-spacing:-.01em;
+    border:1px solid rgba(255,255,255,.09);
+    background:rgba(255,255,255,.04);
+    color:#c3c8d3;
+  }
+  .tag.review{color:#ffd479;background:rgba(255,198,74,.11);border-color:rgba(255,198,74,.26);}
+  .m-note{
+    margin:18px 0 0;
+    font-size:14px;
+    line-height:1.72;
+    letter-spacing:-.015em;
+    color:#b7bdc9;
+    word-break:keep-all;
+  }
+  .m-rows{
+    margin-top:20px;
+    padding-top:16px;
+    border-top:1px solid rgba(255,255,255,.07);
+    display:grid;
+    gap:10px;
+  }
+  .m-row{display:flex;justify-content:space-between;gap:16px;font-size:12.5px;letter-spacing:-.01em;}
+  .m-row dt{color:#6f7583;}
+  .m-row dd{margin:0;color:#c2c7d1;text-align:right;font-weight:550;}
+
+  @keyframes cardIn{
+    from{opacity:0;transform:translateY(6px);}
+    to{opacity:1;transform:none;}
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width:860px){
+    .app{padding:30px 18px 72px;}
+    .kpis{margin-top:26px;gap:10px;}
+    .section-title{margin-top:40px;}
+    .controls{margin-top:16px;}
+    .switch{margin-left:0;}
+    .board{grid-template-columns:1fr;gap:11px;padding:11px;}
+  }
+  @media (max-width:560px){
+    .app{padding:26px 14px 64px;}
+    h1{font-size:26px;}
+    .sub{font-size:13.5px;margin-top:10px;}
+    .kpi .num{font-size:29px;}
+    .kpi .lab{font-size:12px;margin-top:9px;}
+    .updated{font-size:12px;margin-top:20px;}
+    .section-title{font-size:21px;margin-top:34px;}
+    .pills{
+      margin-left:-14px;margin-right:-14px;
+      padding-left:14px;padding-right:14px;
+      -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 22px),transparent 100%);
+      mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 22px),transparent 100%);
+    }
+    .pill{font-size:13.5px;padding:9px 14px;}
+    .switch{font-size:13.5px;}
+    .col-name{font-size:15px;}
+    .card-title{font-size:13.5px;}
+    .card-note{font-size:11.5px;}
+    .backdrop{padding:0;align-items:flex-end;}
+    .modal{
+      width:100%;
+      max-height:86vh;
+      border-radius:22px 22px 0 0;
+      border-bottom:0;
+      padding:22px 20px calc(24px + env(safe-area-inset-bottom));
+    }
+    .m-title{font-size:18px;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation-duration:.001ms !important;transition-duration:.001ms !important;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="page-head">
+    <h1>작업 현황</h1>
+    <p class="sub">현재 대기 중인 작업과 예약 완료 내역을 한눈에 확인할 수 있어요.</p>
+
+    <div class="kpis" id="kpis">
+      <div class="kpi"><div class="num" data-kpi="todo">0</div><div class="lab">할 일</div></div>
+      <div class="kpi"><div class="num" data-kpi="doing">0</div><div class="lab">진행·예약</div></div>
+      <div class="kpi"><div class="num" data-kpi="done">0</div><div class="lab">완료</div></div>
+      <div class="kpi"><div class="num" data-kpi="review">0</div><div class="lab">확인 대기</div></div>
+    </div>
+
+    <p class="updated">최근 업데이트: 11월 18일 오전 11:08</p>
+  </header>
+
+  <main>
+    <h2 class="section-title">칸반 보드</h2>
+
+    <div class="controls">
+      <div class="pills" id="pills" role="group" aria-label="분류 필터"></div>
+      <button class="switch" id="reviewSwitch" type="button" role="switch" aria-checked="false">
+        <span class="switch-track" aria-hidden="true"><span class="switch-knob"></span></span>
+        <span>확인 대기만 보기</span>
+      </button>
+    </div>
+
+    <div class="board" id="board"></div>
+    <p class="hint">카드를 누르면 상세 내용을 볼 수 있어요.</p>
+  </main>
+</div>
+
+<div class="backdrop" id="backdrop" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle" id="modal">
+    <div class="m-top">
+      <span class="m-cat" id="mCat"></span>
+      <button class="m-close" id="mClose" type="button" aria-label="닫기">✕</button>
+    </div>
+    <h3 class="m-title" id="mTitle"></h3>
+    <div class="m-status" id="mStatus"></div>
+    <p class="m-note" id="mNote"></p>
+    <dl class="m-rows" id="mRows"></dl>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var CATS = {
+    invest:  { label: "투자·증시",    emoji: "📊", color: "#6f9bff" },
+    routine: { label: "루틴",        emoji: "☀️", color: "#ffcc66" },
+    content: { label: "문서·콘텐츠",  emoji: "🎨", color: "#b79bff" },
+    device:  { label: "연동·장비",    emoji: "🔗", color: "#5fd6c4" },
+    config:  { label: "설정",        emoji: "🍒", color: "#ff8fa6" }
+  };
+
+  var COLUMNS = [
+    { id: "todo",  title: "할 일",     color: "#8d97ab" },
+    { id: "doing", title: "진행·예약", color: "#6f9bff" },
+    { id: "done",  title: "완료",     color: "#4ec9a1" }
+  ];
+
+  var TASKS = [
+    /* ---- 할 일 ---- */
+    { id: "t1", col: "todo", cat: "invest", review: false,
+      title: "앤트로픽 IPO(11/19) 이후 수급 점검",
+      note: "11/19 상장 후 나스닥·국장 수급 쏠림이 완화되는지 확인할 예정. 상장 첫날 거래대금과 기존 AI 관련주로의 자금 이동을 함께 본다." },
+    { id: "t2", col: "todo", cat: "invest", review: false,
+      title: "화장품 ODM 눌림·수급 체크",
+      note: "눌림 구간 및 외국인 수급 전환 여부 관찰" },
+    { id: "t3", col: "todo", cat: "content", review: true,
+      title: "사이드 비즈니스 제작·채널 방향 확정",
+      note: "주식 티커 키캡과 모니터 액막이 수호신을 DIY로 만들지 외주로 맡길지, 쇼츠·블로그 중 어느 채널을 먼저 열지 결정을 기다리는 중." },
+    { id: "t4", col: "todo", cat: "invest", review: true,
+      title: "연금 TDF 교체 기준선 확인",
+      note: "반등 시 금리형 안전자산 교체 기준선 확인 대기" },
+    { id: "t5", col: "todo", cat: "device", review: true,
+      title: "영상 편집 장비 방향 확인",
+      note: "기존 장비 테스트 결과에 따라 모니터·노트북 결정 대기" },
+    { id: "t6", col: "todo", cat: "config", review: true,
+      title: "아침 브리핑 조건 정리 카드 확인",
+      note: "11/18 오전에 정리한 브리핑 구성·조건을 기준으로 수정할 부분이 있는지, 그대로 유지할지 확인 대기." },
+    { id: "t7", col: "todo", cat: "device", review: false,
+      title: "구독 콘텐츠 요약 연동",
+      note: "알림 연동 정보 전달 시 자동 요약 스케줄 등록 예정" },
+
+    /* ---- 진행·예약 ---- */
+    { id: "p1", col: "doing", cat: "routine", review: false,
+      title: "모닝 브리핑", stamp: "매일 07:00",
+      note: "동네 날씨·미세먼지·인근 지역 전시, 밤사이 미장 흐름, 경제뉴스 5선, 국장 7단계 점검을 묶어서 전달." },
+    { id: "p2", col: "doing", cat: "routine", review: false,
+      title: "증시 마감 저녁 브리핑", stamp: "평일 18:10",
+      note: "코스피·코스닥 15:30 확정 종가, 18:10 나스닥 선물, 종배 후보 검증까지 한 번에 정리." },
+    { id: "p3", col: "doing", cat: "routine", review: false,
+      title: "나스닥 장중 밤 12시 브리핑", stamp: "화~토 00:00",
+      note: "미 정규장 개장 30분 후 지수 흐름, 연금주(VRT·BE)와 야간 관찰 3선을 점검." },
+    { id: "p4", col: "doing", cat: "routine", review: false,
+      title: "16인치 노트북 특가 감시 (매일 3회)", stamp: "매일 3회",
+      note: "10:30 / 14:30 / 19:30 조건 부합 매물 정기 점검 중" },
+
+    /* ---- 완료 ---- */
+    { id: "d1", col: "done", cat: "invest", review: false,
+      title: "심텍(222800) 제외 사유 & 이수페타시스 비교", stamp: "11/18 09:28",
+      note: "20일선(-6.11%) 이탈과 외국인 수급, 3분기 실적을 이수페타시스와 비교해 제외 사유를 정리 완료." },
+    { id: "d2", col: "done", cat: "invest", review: false,
+      title: "조비 에비에이션(JOBY) 주식수·희석 점검", stamp: "11/18 02:50",
+      note: "3분기 10-Q와 424B5 공시, 잔여 ATM 한도를 분석해 희석 규모를 확인 완료." },
+    { id: "d3", col: "done", cat: "invest", review: false,
+      title: "코스메카코리아 손익비·ODM 계절성 분석", stamp: "11/17 18:33",
+      note: "손익비 타점과 4~6월 성수기 전략을 정리 완료." },
+    { id: "d4", col: "done", cat: "invest", review: false,
+      title: "퇴직연금 자산배분 상담", stamp: "11/17 17:45",
+      note: "TDF 비중 확인 및 반등 시 안전자산 교체 방향 정리 완료" },
+    { id: "d5", col: "done", cat: "content", review: false,
+      title: "파스텔 고양이 5종 캐릭터·GIF 시제작", stamp: "11/10",
+      note: "막드로잉 스타일 5종 캐릭터와 개별 GIF 생성까지 완료." },
+    { id: "d6", col: "done", cat: "config", review: false,
+      title: "통신 요금제 유지 확정", stamp: "11/09",
+      note: "기존 요금제 유지로 정리 완료" }
+  ];
+
+  var PILLS = [
+    { key: "all", label: "전체", emoji: "" },
+    { key: "invest", label: "투자·증시", emoji: "📊" },
+    { key: "routine", label: "루틴", emoji: "☀️" },
+    { key: "content", label: "문서·콘텐츠", emoji: "🎨" },
+    { key: "device", label: "연동·장비", emoji: "🔗" },
+    { key: "config", label: "설정", emoji: "🍒" }
+  ];
+
+  var state = { cat: "all", reviewOnly: false };
+  var pillsEl = document.getElementById("pills");
+  var boardEl = document.getElementById("board");
+  var switchEl = document.getElementById("reviewSwitch");
+  var backdrop = document.getElementById("backdrop");
+  var modal = document.getElementById("modal");
+  var mClose = document.getElementById("mClose");
+  var mCat = document.getElementById("mCat");
+  var mTitle = document.getElementById("mTitle");
+  var mStatus = document.getElementById("mStatus");
+  var mNote = document.getElementById("mNote");
+  var mRows = document.getElementById("mRows");
+  var lastCard = null;
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+
+  function countFor(colId) {
+    return TASKS.filter(function (t) { return t.col === colId; }).length;
+  }
+
+  function reviewCount() {
+    return TASKS.filter(function (t) { return t.review; }).length;
+  }
+
+  function matches(t) {
+    if (state.cat !== "all" && t.cat !== state.cat) return false;
+    if (state.reviewOnly && !t.review) return false;
+    return true;
+  }
+
+  /* ---------- KPI with count-up ---------- */
+  function animateNumber(node, target) {
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) { node.textContent = String(target); return; }
+    var start = null, dur = 520;
+    function step(ts) {
+      if (start === null) start = ts;
+      var p = Math.min(1, (ts - start) / dur);
+      var eased = 1 - Math.pow(1 - p, 3);
+      node.textContent = String(Math.round(target * eased));
+      if (p < 1) requestAnimationFrame(step);
+      else node.textContent = String(target);
+    }
+    requestAnimationFrame(step);
+  }
+
+  function renderKpis() {
+    var vals = {
+      todo: countFor("todo"),
+      doing: countFor("doing"),
+      done: countFor("done"),
+      review: reviewCount()
+    };
+    ["todo", "doing", "done", "review"].forEach(function (k) {
+      var node = document.querySelector('[data-kpi="' + k + '"]');
+      animateNumber(node, vals[k]);
+    });
+  }
+
+  /* ---------- Pills ---------- */
+  function renderPills() {
+    pillsEl.innerHTML = "";
+    PILLS.forEach(function (p) {
+      var b = el("button", "pill" + (state.cat === p.key ? " is-active" : ""));
+      b.type = "button";
+      b.setAttribute("aria-pressed", String(state.cat === p.key));
+      if (p.emoji) b.appendChild(el("span", "em", p.emoji));
+      b.appendChild(document.createTextNode(p.label));
+      b.addEventListener("click", function () {
+        state.cat = p.key;
+        render();
+      });
+      pillsEl.appendChild(b);
+    });
+  }
+
+  /* ---------- Board ---------- */
+  function cardEl(t) {
+    var c = el("button", "card");
+    c.type = "button";
+    c.dataset.id = t.id;
+    c.style.setProperty("--c", CATS[t.cat].color);
+    c.setAttribute("aria-label", t.title + " 상세 보기");
+
+    var top = el("span", "card-top");
+    var chip = el("span", "chip");
+    chip.appendChild(el("span", "em", CATS[t.cat].emoji));
+    chip.appendChild(document.createTextNode(CATS[t.cat].label));
+    top.appendChild(chip);
+
+    if (t.review) {
+      var badge = el("span", "badge");
+      badge.appendChild(el("span", "bdot"));
+      badge.appendChild(document.createTextNode("확인 대기"));
+      top.appendChild(badge);
+    } else if (t.stamp) {
+      top.appendChild(el("span", "stamp", t.stamp));
+    }
+    c.appendChild(top);
+
+    c.appendChild(el("span", "card-title", t.title));
+    c.appendChild(el("span", "card-note", t.note));
+
+    c.addEventListener("click", function () { openModal(t, c); });
+    return c;
+  }
+
+  function renderBoard() {
+    boardEl.innerHTML = "";
+    COLUMNS.forEach(function (col) {
+      var list = TASKS.filter(function (t) { return t.col === col.id && matches(t); });
+      var colEl = el("section", "column col-" + col.id);
+      colEl.setAttribute("aria-label", col.title);
+
+      var head = el("div", "col-head");
+      var name = el("span", "col-name");
+      var dot = el("span", "dot");
+      dot.style.background = col.color;
+      dot.style.color = col.color;
+      name.appendChild(dot);
+      name.appendChild(document.createTextNode(col.title));
+      head.appendChild(name);
+      head.appendChild(el("span", "col-count", String(list.length)));
+      colEl.appendChild(head);
+
+      var wrap = el("div", "cards");
+      if (list.length === 0) {
+        wrap.appendChild(el("div", "empty", "표시할 작업이 없어요"));
+      } else {
+        list.forEach(function (t, i) {
+          var c = cardEl(t);
+          c.style.animationDelay = Math.min(i * 26, 180) + "ms";
+          wrap.appendChild(c);
+        });
+      }
+      colEl.appendChild(wrap);
+      boardEl.appendChild(colEl);
+    });
+  }
+
+  function render() {
+    renderPills();
+    renderBoard();
+  }
+
+  /* ---------- Modal ---------- */
+  function openModal(t, cardNode) {
+    lastCard = cardNode || null;
+    mCat.innerHTML = "";
+    mCat.appendChild(el("span", "", CATS[t.cat].emoji));
+    mCat.appendChild(document.createTextNode(" " + CATS[t.cat].label));
+    mTitle.textContent = t.title;
+    mNote.textContent = t.note;
+
+    mStatus.innerHTML = "";
+    var colName = COLUMNS.filter(function (c) { return c.id === t.col; })[0].title;
+    var st = el("span", "tag");
+    var sdot = el("span", "dot");
+    var colColor = COLUMNS.filter(function (c) { return c.id === t.col; })[0].color;
+    sdot.style.background = colColor;
+    sdot.style.color = colColor;
+    st.appendChild(sdot);
+    st.appendChild(document.createTextNode(colName));
+    mStatus.appendChild(st);
+    if (t.review) {
+      mStatus.appendChild(el("span", "tag review", "● 확인 대기"));
+    }
+
+    mRows.innerHTML = "";
+    var rows = [["분류", CATS[t.cat].emoji + " " + CATS[t.cat].label]];
+    if (t.stamp) rows.push([t.col === "done" ? "완료 시각" : "주기", t.stamp]);
+    rows.forEach(function (r) {
+      var row = el("div", "m-row");
+      row.appendChild(el("dt", "", r[0]));
+      row.appendChild(el("dd", "", r[1]));
+      mRows.appendChild(row);
+    });
+
+    backdrop.classList.add("open");
+    backdrop.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+    setTimeout(function () { mClose.focus(); }, 30);
+  }
+
+  function closeModal() {
+    if (!backdrop.classList.contains("open")) return;
+    backdrop.classList.remove("open");
+    backdrop.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+    if (lastCard && lastCard.isConnected) lastCard.focus();
+  }
+
+  mClose.addEventListener("click", closeModal);
+  backdrop.addEventListener("click", function (e) {
+    if (e.target === backdrop) closeModal();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") closeModal();
+    if (e.key === "Tab" && backdrop.classList.contains("open")) {
+      e.preventDefault();
+      mClose.focus();
+    }
+  });
+
+  /* ---------- Switch ---------- */
+  switchEl.addEventListener("click", function () {
+    state.reviewOnly = !state.reviewOnly;
+    switchEl.setAttribute("aria-checked", String(state.reviewOnly));
+    renderBoard();
+  });
+
+  /* ---------- Init ---------- */
+  renderKpis();
+  render();
+})();
+</script>
+</body>
+</html>
